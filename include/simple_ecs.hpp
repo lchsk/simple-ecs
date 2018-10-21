@@ -1,79 +1,83 @@
 // TODO:
 // * nested entities
-// * container around component returned by get()
 // * update function
-// * create() should return a ptr?
 // * view example
 // * remove
 // * game example
 
-#include <iostream>
-
-#include <functional>
-#include <map>
 #include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
-#include <type_traits>
 #include <typeindex>
+#include <unordered_map>
+
+#define ECS_GET_TYPE_INDEX(T) std::type_index(typeid(T));
 
 namespace ecs {
 
+namespace internal {
 struct BaseHolder {
   virtual ~BaseHolder() {}
 };
+}
 
-template <typename T> struct Holder : BaseHolder {
-  template <typename... Args> Holder(Args &&... args) : value(T{args...}) {}
+template <typename Component> struct Holder : internal::BaseHolder {
+  template <typename... Args>
+  Holder(Args &&... args) : value(Component{args...}) {}
 
-  T &get() { return value; }
+  Component *operator->() { return &value; }
 
-  T value;
+private:
+  Component value;
 };
 
 struct entity {
   ~entity() {
-    for (auto s : h) {
-      delete s.second;
+    for (auto holder : components) {
+      if (holder.second) {
+        delete holder.second;
+      }
     }
   }
 
-  template <typename T> T &get() {
-    std::type_index key = std::type_index(typeid(T));
+  template <typename Component> bool has() {
+    const auto component_index = ECS_GET_TYPE_INDEX(Component);
 
-    BaseHolder *holder = NULL;
+    if (components.find(component_index) == components.end())
+      return false;
 
-    try {
-      holder = h[key];
-    } catch (std::out_of_range &) {
-    }
-
-    Holder<T> *val = static_cast<Holder<T> *>(holder);
-    auto &v = val->value;
-
-    return v;
+    return true;
   }
 
-  template <typename Component, typename... Args> void assign(Args &&... args) {
+  template <typename Component> Holder<Component> &get() {
+    const auto component_index = ECS_GET_TYPE_INDEX(Component);
+
+    if (!has<Component>()) {
+      throw std::exception();
+    }
+
+    internal::BaseHolder *holder = components[component_index];
+
+    return *static_cast<Holder<Component> *>(holder);
+  }
+
+  template <typename Component, typename... Args> void add(Args &&... args) {
     Holder<Component> *holder =
         new Holder<Component>(std::forward<Args>(args)...);
 
-    std::type_index key = std::type_index(typeid(Component));
+    const std::type_index component_index = std::type_index(typeid(Component));
 
-    h[key] = holder;
+    components[component_index] = holder;
   }
 
-  std::unordered_map<std::type_index, BaseHolder *> h;
+  std::unordered_map<std::type_index, internal::BaseHolder *> components;
 };
 
-struct registry {
-  std::unique_ptr<entity> create() { return std::make_unique<entity>(); }
+struct System {
+  std::unique_ptr<entity> create_unique() { return std::make_unique<entity>(); }
+  std::shared_ptr<entity> create_shared() { return std::make_shared<entity>(); }
 
   template <typename Component, typename... Args>
-  void assign(std::unique_ptr<entity> &e, Args &&... args) {
-    e->assign<Component>(std::forward<Args>(args)...);
+  void add(entity &entity, Args &&... args) {
+    entity.add<Component>(std::forward<Args>(args)...);
   }
 };
 }
