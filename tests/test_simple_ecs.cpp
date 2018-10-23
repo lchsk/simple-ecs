@@ -23,14 +23,14 @@ struct User {
 };
 
 struct Nested {
-  std::shared_ptr<ecs::entity> entity;
+  ecs::entity* entity;
 };
 
 
 TEST(TestSimpleECS, check_if_entity_has_component) {
   ecs::System system;
 
-  std::unique_ptr<ecs::entity> e = system.create_unique();
+  auto e = system.create();
 
   ASSERT_FALSE(e->has<Name>());
 
@@ -42,7 +42,7 @@ TEST(TestSimpleECS, check_if_entity_has_component) {
 TEST(TestSimpleECS, add_and_get_one_component) {
   ecs::System system;
 
-  std::unique_ptr<ecs::entity> e = system.create_unique();
+  auto e = system.create();
 
   system.add<Position>(*e, 3, 5);
 
@@ -60,7 +60,7 @@ TEST(TestSimpleECS, add_and_get_one_component) {
 TEST(TestSimpleECS, add_two_components) {
   ecs::System system;
 
-  std::shared_ptr<ecs::entity> e = system.create_shared();
+  auto e = system.create();
 
   system.add<Position>(*e, 1, 10);
   system.add<Name>(*e, "test");
@@ -77,7 +77,7 @@ TEST(TestSimpleECS, add_two_components) {
 TEST(TestSimpleECS, attempt_to_get_non_existing_component) {
   ecs::System system;
 
-  std::shared_ptr<ecs::entity> e = system.create_shared();
+  auto e = system.create();
 
   ASSERT_THROW(e->get<Position>(), ecs::ComponentNotFound);
 }
@@ -85,7 +85,7 @@ TEST(TestSimpleECS, attempt_to_get_non_existing_component) {
 TEST(TestSimpleECS, remove_component) {
   ecs::System system;
 
-  std::shared_ptr<ecs::entity> e = system.create_shared();
+  auto e = system.create();
 
   // Try to remove a component that wasn't yet added
   ASSERT_FALSE(e->remove<Position>());
@@ -101,7 +101,7 @@ TEST(TestSimpleECS, remove_component) {
 TEST(TestSimpleECS, add_nested_component) {
   ecs::System system;
 
-  std::shared_ptr<ecs::entity> e = system.create_shared();
+  auto e = system.create();
 
   system.add<User>(*e, std::make_shared<Position>(1, 1));
 
@@ -114,8 +114,8 @@ TEST(TestSimpleECS, add_nested_component) {
 TEST(TestSimpleECS, nested_entities) {
   ecs::System system;
 
-  std::shared_ptr<ecs::entity> e1 = system.create_shared();
-  std::shared_ptr<ecs::entity> e2 = system.create_shared();
+  auto e1 = system.create();
+  auto e2 = system.create();
 
   system.add<Nested>(*e1, e2);
   system.add<Position>(*e2, 2, 5);

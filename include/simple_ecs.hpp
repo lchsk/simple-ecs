@@ -100,9 +100,28 @@ struct System {
   std::unique_ptr<entity> create_unique() { return std::make_unique<entity>(); }
   std::shared_ptr<entity> create_shared() { return std::make_shared<entity>(); }
 
+  entity* create() {
+    entity* e = new entity;
+
+    entities.push_back(e);
+
+    return e;
+  }
+
+  ~System() {
+    for (entity* e : entities) {
+      if (e) {
+        delete e;
+      }
+    }
+  }
+
   template <typename Component, typename... Args>
   void add(entity &entity, Args &&... args) {
     entity.add<Component>(std::forward<Args>(args)...);
   }
+
+private:
+  std::vector<entity*> entities;
 };
 }
