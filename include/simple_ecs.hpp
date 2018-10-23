@@ -1,8 +1,6 @@
 // TODO:
-// * nested entities
 // * update function
 // * view example
-// * remove
 // * game example
 
 #include <memory>

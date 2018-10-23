@@ -22,6 +22,10 @@ struct User {
   std::shared_ptr<Position> position;
 };
 
+struct Nested {
+  std::shared_ptr<ecs::entity> entity;
+};
+
 
 TEST(TestSimpleECS, check_if_entity_has_component) {
   ecs::System system;
@@ -105,6 +109,24 @@ TEST(TestSimpleECS, add_nested_component) {
 
   ASSERT_EQ(user->position->x, 1);
   ASSERT_EQ(user->position->y, 1);
+}
+
+TEST(TestSimpleECS, nested_entities) {
+  ecs::System system;
+
+  std::shared_ptr<ecs::entity> e1 = system.create_shared();
+  std::shared_ptr<ecs::entity> e2 = system.create_shared();
+
+  system.add<Nested>(*e1, e2);
+  system.add<Position>(*e2, 2, 5);
+
+  auto &nested = e1->get<Nested>();
+
+  auto &pos1 = nested->entity->get<Position>();
+  auto &pos2 = e2->get<Position>();
+
+  ASSERT_EQ(pos1->x, pos2->x);
+  ASSERT_EQ(pos1->y, pos2->y);
 }
 
 
