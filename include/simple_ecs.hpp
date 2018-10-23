@@ -73,6 +73,12 @@ struct entity {
     if (component_it == components.end())
       return false;
 
+    internal::BaseHolder* bh = component_it->second;
+
+    if (bh) {
+      delete bh;
+    }
+
     components.erase(component_it);
 
     return true;
