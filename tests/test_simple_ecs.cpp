@@ -6,6 +6,8 @@ struct Position {
   int x;
   int y;
 
+  Position(int x, int y) : x(x), y(y) {}
+
   void move(int dx, int dy) {
     x += dx;
     y += dy;
@@ -15,6 +17,11 @@ struct Position {
 struct Name {
   std::string name;
 };
+
+struct User {
+  std::shared_ptr<Position> position;
+};
+
 
 TEST(TestSimpleECS, check_if_entity_has_component) {
   ecs::System system;
@@ -86,6 +93,20 @@ TEST(TestSimpleECS, remove_component) {
   ASSERT_TRUE(e->remove<Position>());
   ASSERT_THROW(e->get<Position>(), ecs::ComponentNotFound);
 }
+
+TEST(TestSimpleECS, add_nested_component) {
+  ecs::System system;
+
+  std::shared_ptr<ecs::entity> e = system.create_shared();
+
+  system.add<User>(*e, std::make_shared<Position>(1, 1));
+
+  auto &user = e->get<User>();
+
+  ASSERT_EQ(user->position->x, 1);
+  ASSERT_EQ(user->position->y, 1);
+}
+
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
