@@ -49,7 +49,7 @@ TEST(TestSimpleECS, add_and_get_one_component) {
 TEST(TestSimpleECS, add_two_components) {
   ecs::System system;
 
-  std::shared_ptr<ecs::entity> e = system.create_unique();
+  std::shared_ptr<ecs::entity> e = system.create_shared();
 
   system.add<Position>(*e, 1, 10);
   system.add<Name>(*e, "test");
@@ -61,6 +61,14 @@ TEST(TestSimpleECS, add_two_components) {
   ASSERT_EQ(pos->y, 10);
 
   ASSERT_EQ(name->name, "test");
+}
+
+TEST(TestSimpleECS, attempt_to_get_non_existing_component) {
+  ecs::System system;
+
+  std::shared_ptr<ecs::entity> e = system.create_shared();
+
+  ASSERT_THROW(e->get<Position>(), ecs::ComponentNotFound);
 }
 
 int main(int argc, char **argv) {

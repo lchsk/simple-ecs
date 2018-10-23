@@ -13,6 +13,10 @@
 
 namespace ecs {
 
+  struct ComponentNotFound : public std::runtime_error {
+    ComponentNotFound(const std::string& what) : std::runtime_error(what) {}
+  };
+
 namespace internal {
 struct BaseHolder {
   virtual ~BaseHolder() {}
@@ -51,7 +55,12 @@ struct entity {
     const auto component_index = ECS_GET_TYPE_INDEX(Component);
 
     if (!has<Component>()) {
-      throw std::exception();
+      const std::string name = typeid(Component).name();
+
+      char msg[1024];
+      snprintf(msg, 1024, "Component '%s' not found", name.c_str());
+
+      throw ComponentNotFound(msg);
     }
 
     internal::BaseHolder *holder = components[component_index];
