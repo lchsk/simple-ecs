@@ -31,8 +31,8 @@ private:
   Component value;
 };
 
-struct entity {
-  ~entity() {
+struct Entity {
+  ~Entity() {
     for (auto holder : components) {
       if (holder.second) {
         delete holder.second;
@@ -97,11 +97,11 @@ struct entity {
 };
 
 struct System {
-  std::unique_ptr<entity> create_unique() { return std::make_unique<entity>(); }
-  std::shared_ptr<entity> create_shared() { return std::make_shared<entity>(); }
+  std::unique_ptr<Entity> create_unique() { return std::make_unique<Entity>(); }
+  std::shared_ptr<Entity> create_shared() { return std::make_shared<Entity>(); }
 
-  entity* create() {
-    entity* e = new entity;
+  Entity* create() {
+    Entity* e = new Entity;
 
     entities.push_back(e);
 
@@ -109,7 +109,7 @@ struct System {
   }
 
   ~System() {
-    for (entity* e : entities) {
+    for (Entity* e : entities) {
       if (e) {
         delete e;
       }
@@ -117,11 +117,11 @@ struct System {
   }
 
   template <typename Component, typename... Args>
-  void add(entity &entity, Args &&... args) {
-    entity.add<Component>(std::forward<Args>(args)...);
+  void add(Entity &Entity, Args &&... args) {
+    Entity.add<Component>(std::forward<Args>(args)...);
   }
 
 private:
-  std::vector<entity*> entities;
+  std::vector<Entity*> entities;
 };
 }

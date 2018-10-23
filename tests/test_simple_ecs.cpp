@@ -23,7 +23,7 @@ struct User {
 };
 
 struct Nested {
-  ecs::entity* entity;
+  ecs::Entity* entity;
 };
 
 
