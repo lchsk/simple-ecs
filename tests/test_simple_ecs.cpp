@@ -71,6 +71,22 @@ TEST(TestSimpleECS, attempt_to_get_non_existing_component) {
   ASSERT_THROW(e->get<Position>(), ecs::ComponentNotFound);
 }
 
+TEST(TestSimpleECS, remove_component) {
+  ecs::System system;
+
+  std::shared_ptr<ecs::entity> e = system.create_shared();
+
+  // Try to remove a component that wasn't yet added
+  ASSERT_FALSE(e->remove<Position>());
+
+  system.add<Position>(*e, 1, 1);
+
+  auto &pos = e->get<Position>();
+
+  ASSERT_TRUE(e->remove<Position>());
+  ASSERT_THROW(e->get<Position>(), ecs::ComponentNotFound);
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 

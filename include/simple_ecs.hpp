@@ -52,8 +52,6 @@ struct entity {
   }
 
   template <typename Component> Holder<Component> &get() {
-    const auto component_index = ECS_GET_TYPE_INDEX(Component);
-
     if (!has<Component>()) {
       const std::string name = typeid(Component).name();
 
@@ -63,9 +61,23 @@ struct entity {
       throw ComponentNotFound(msg);
     }
 
+    const auto component_index = ECS_GET_TYPE_INDEX(Component);
+
     internal::BaseHolder *holder = components[component_index];
 
     return *static_cast<Holder<Component> *>(holder);
+  }
+
+  template <typename Component> bool remove() {
+    const auto component_index = ECS_GET_TYPE_INDEX(Component);
+    const auto component_it = components.find(component_index);
+
+    if (component_it == components.end())
+      return false;
+
+    components.erase(component_it);
+
+    return true;
   }
 
   template <typename Component, typename... Args> void add(Args &&... args) {
