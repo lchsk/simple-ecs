@@ -26,6 +26,21 @@ struct Nested {
   ecs::Entity* entity;
 };
 
+TEST(TestSimpleECS, add_and_remove_entity) {
+  ecs::System system;
+
+  ASSERT_EQ(system.size(), 0);
+
+  auto e = system.create();
+
+  ASSERT_EQ(system.size(), 1);
+
+  ASSERT_TRUE(system.remove(e));
+  ASSERT_EQ(system.size(), 0);
+
+  ASSERT_FALSE(system.remove(e));
+  ASSERT_EQ(system.size(), 0);
+}
 
 TEST(TestSimpleECS, check_if_entity_has_component) {
   ecs::System system;

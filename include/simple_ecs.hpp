@@ -121,6 +121,25 @@ struct System {
     entity->add<Component>(std::forward<Args>(args)...);
   }
 
+  bool remove(Entity *entity) {
+    const auto it = std::remove(entities.begin(), entities.end(), entity);
+
+    if (it == entities.end())
+      return false;
+
+    entities.erase(it, entities.end());
+
+    if (entity) {
+      delete entity;
+    }
+
+    return true;
+  }
+
+  std::size_t size() const {
+	return entities.size();
+  }
+
 private:
   std::vector<Entity*> entities;
 };
