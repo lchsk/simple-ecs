@@ -117,8 +117,8 @@ struct System {
   }
 
   template <typename Component, typename... Args>
-  void add(Entity &Entity, Args &&... args) {
-    Entity.add<Component>(std::forward<Args>(args)...);
+  void add(Entity *entity, Args &&... args) {
+    entity->add<Component>(std::forward<Args>(args)...);
   }
 
 private:

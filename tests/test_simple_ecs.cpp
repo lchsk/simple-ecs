@@ -34,7 +34,7 @@ TEST(TestSimpleECS, check_if_entity_has_component) {
 
   ASSERT_FALSE(e->has<Name>());
 
-  system.add<Name>(*e, "test");
+  system.add<Name>(e, "test");
 
   ASSERT_TRUE(e->has<Name>());
 }
@@ -44,7 +44,7 @@ TEST(TestSimpleECS, add_and_get_one_component) {
 
   auto e = system.create();
 
-  system.add<Position>(*e, 3, 5);
+  system.add<Position>(e, 3, 5);
 
   auto &pos = e->get<Position>();
 
@@ -62,8 +62,8 @@ TEST(TestSimpleECS, add_two_components) {
 
   auto e = system.create();
 
-  system.add<Position>(*e, 1, 10);
-  system.add<Name>(*e, "test");
+  system.add<Position>(e, 1, 10);
+  system.add<Name>(e, "test");
 
   auto &pos = e->get<Position>();
   auto &name = e->get<Name>();
@@ -90,7 +90,7 @@ TEST(TestSimpleECS, remove_component) {
   // Try to remove a component that wasn't yet added
   ASSERT_FALSE(e->remove<Position>());
 
-  system.add<Position>(*e, 1, 1);
+  system.add<Position>(e, 1, 1);
 
   auto &pos = e->get<Position>();
 
@@ -103,7 +103,7 @@ TEST(TestSimpleECS, add_nested_component) {
 
   auto e = system.create();
 
-  system.add<User>(*e, std::make_shared<Position>(1, 1));
+  system.add<User>(e, std::make_shared<Position>(1, 1));
 
   auto &user = e->get<User>();
 
@@ -117,8 +117,8 @@ TEST(TestSimpleECS, nested_entities) {
   auto e1 = system.create();
   auto e2 = system.create();
 
-  system.add<Nested>(*e1, e2);
-  system.add<Position>(*e2, 2, 5);
+  system.add<Nested>(e1, e2);
+  system.add<Position>(e2, 2, 5);
 
   auto &nested = e1->get<Nested>();
 
