@@ -144,6 +144,33 @@ TEST(TestSimpleECS, nested_entities) {
   ASSERT_EQ(pos1->y, pos2->y);
 }
 
+TEST(TestViews, test_entities_with_the_same_component) {
+  ecs::System system;
+
+  auto e1 = system.create();
+  auto e2 = system.create();
+  auto e3 = system.create();
+
+  system.add<Position>(e1, 1, 1);
+  system.add<Position>(e2, 2, 2);
+  system.add<Position>(e3, 3, 3);
+
+  auto view = ecs::VectorView::create<Position>(system);
+
+  ASSERT_EQ(view.size(), 3);
+
+  int pos = 1;
+
+  for (ecs::Entity *e : view.entities()) {
+    auto &component = e->get<Position>();
+
+    ASSERT_EQ(component->x, pos);
+    ASSERT_EQ(component->y, pos);
+
+    pos++;
+  }
+}
+
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

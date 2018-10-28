@@ -1,8 +1,3 @@
-// TODO:
-// * update function
-// * view example
-// * game example
-
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
@@ -97,8 +92,6 @@ struct Entity {
 };
 
 struct System {
-  std::unique_ptr<Entity> create_unique() { return std::make_unique<Entity>(); }
-  std::shared_ptr<Entity> create_shared() { return std::make_shared<Entity>(); }
 
   Entity* create() {
     Entity* e = new Entity;
@@ -140,7 +133,48 @@ struct System {
 	return entities.size();
   }
 
+  friend struct VectorView;
 private:
   std::vector<Entity*> entities;
+
 };
+
+  struct VectorView
+  {
+    template <typename... Components>
+    static VectorView create(ecs::System& system) {
+      VectorView view;
+
+      for (Entity* entity : system.entities) {
+        const bool has_components = view.has_components<Components...>(entity);
+
+        if (has_components) {
+          view.m_entities.push_back(entity);
+        }
+      }
+
+      return view;
+    }
+
+    const std::vector<Entity*> entities() const {
+      return m_entities;
+    }
+
+    std::size_t size() const {
+      return m_entities.size();
+    }
+
+  private:
+    template <typename Component>
+    bool has_components(Entity* entity) {
+      return entity->has<Component>();
+    }
+
+    template <typename FirstComponent, typename SecondComponent, typename... OtherComponents>
+    bool has_components(Entity* entity) {
+      return has_components<FirstComponent>(entity) && has_components<SecondComponent, OtherComponents...>(entity);
+    }
+
+    std::vector<Entity*> m_entities;
+  };
 }
