@@ -171,6 +171,91 @@ TEST(TestViews, test_entities_with_the_same_component) {
   }
 }
 
+TEST(TestViews, test_entities_with_multiple_components) {
+  ecs::System system;
+
+  auto e1 = system.create();
+  auto e2 = system.create();
+  auto e3 = system.create();
+
+  system.add<Position>(e1, 1, 1);
+  system.add<Name>(e1, "test");
+  system.add<Position>(e2, 3, 3);
+  system.add<User>(e2);
+
+  {
+    auto view = ecs::VectorView::create<Position>(system);
+
+    ASSERT_EQ(view.size(), 2);
+  }
+
+  {
+    auto view = ecs::VectorView::create<Name, Position>(system);
+
+    ASSERT_EQ(view.size(), 1);
+
+    auto e = view.entities()[0];
+
+    auto &position = e->get<Position>();
+
+    ASSERT_EQ(position->x, 1);
+    ASSERT_EQ(position->y, 1);
+
+    auto &name = e->get<Name>();
+
+    ASSERT_EQ(name->name, "test");
+  }
+
+  {
+    auto view = ecs::VectorView::create<Name, User, Position>(system);
+
+    ASSERT_EQ(view.size(), 0);
+  }
+}
+
+TEST(TestViews, test_empty_view) {
+  ecs::System system;
+
+  auto e1 = system.create();
+  auto e2 = system.create();
+
+  system.add<Position>(e1, 1, 1);
+  system.add<Name>(e2, "test");
+
+  auto view = ecs::VectorView::create<Name, Position>(system);
+
+  ASSERT_EQ(view.size(), 0);
+}
+
+TEST(TestViews, test_entity_with_many_components) {
+  ecs::System system;
+
+  auto e1 = system.create();
+  auto e2 = system.create();
+
+  struct A {};
+  struct B {};
+
+  system.add<Position>(e1, 1, 1);
+  system.add<Name>(e1, "test");
+  system.add<User>(e1);
+  system.add<A>(e1);
+
+  {
+    auto view = ecs::VectorView::create<Name, Position>(system);
+    ASSERT_EQ(view.size(), 1);
+  }
+
+  {
+    auto view = ecs::VectorView::create<Name, Position, User, A>(system);
+    ASSERT_EQ(view.size(), 1);
+  }
+
+  {
+    auto view = ecs::VectorView::create<Name, Position, B, A>(system);
+    ASSERT_EQ(view.size(), 0);
+  }
+}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
