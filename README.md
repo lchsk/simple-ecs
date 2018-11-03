@@ -1,12 +1,16 @@
 # simple-ecs
 
-Simple implementation of entity-component system
+A simple header-only implementation of entity-component system
 
 ## Installation
 
-## Building from source
+Just add `include/simple_ecs.hpp` to your source code.
+
+## Building tests
 
 Make sure that you have [CMake](http://www.cmake.org/) and a C++ compiler installed.
+
+You also need `pkg-config` and `googletest`.
 
 Then open a terminal, go to the source directory and type the following commands:
 
@@ -16,6 +20,8 @@ Then open a terminal, go to the source directory and type the following commands
     $ make
 
 ## Running tests
+
+`$ ctest`
 
 ## License
 
