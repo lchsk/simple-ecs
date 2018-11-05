@@ -1,14 +1,28 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                 Simple ECS                                //
+///////////////////////////////////////////////////////////////////////////////
+
+// Simple ECS
+// Author: Maciej Lechowski
+// Version: 0.1.1
+// https://github.com/lchsk/simple-ecs
+
+#ifndef SIMPLE_ECS_HPP
+#define SIMPLE_ECS_HPP
+
+#include <algorithm>
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
+#include <vector>
 
 #define ECS_GET_TYPE_INDEX(T) std::type_index(typeid(T));
 
 namespace ecs {
 
-  struct ComponentNotFound : public std::runtime_error {
-    ComponentNotFound(const std::string& what) : std::runtime_error(what) {}
-  };
+struct ComponentNotFound : public std::runtime_error {
+  ComponentNotFound(const std::string &what) : std::runtime_error(what) {}
+};
 
 namespace internal {
 struct BaseHolder {
@@ -68,7 +82,7 @@ struct Entity {
     if (component_it == components.end())
       return false;
 
-    internal::BaseHolder* bh = component_it->second;
+    internal::BaseHolder *bh = component_it->second;
 
     if (bh) {
       delete bh;
@@ -93,8 +107,8 @@ struct Entity {
 
 struct System {
 
-  Entity* create() {
-    Entity* e = new Entity;
+  Entity *create() {
+    Entity *e = new Entity;
 
     entities.push_back(e);
 
@@ -102,7 +116,7 @@ struct System {
   }
 
   ~System() {
-    for (Entity* e : entities) {
+    for (Entity *e : entities) {
       if (e) {
         delete e;
       }
@@ -129,52 +143,48 @@ struct System {
     return true;
   }
 
-  std::size_t size() const {
-	return entities.size();
-  }
+  std::size_t size() const { return entities.size(); }
 
   friend struct VectorView;
-private:
-  std::vector<Entity*> entities;
 
+private:
+  std::vector<Entity *> entities;
 };
 
-  struct VectorView
-  {
-    template <typename... Components>
-    static VectorView create(ecs::System& system) {
-      VectorView view;
+struct VectorView {
+  template <typename... Components>
+  static VectorView create(ecs::System &system) {
+    VectorView view;
 
-      for (Entity* entity : system.entities) {
-        const bool has_components = view.has_components<Components...>(entity);
+    for (Entity *entity : system.entities) {
+      const bool has_components = view.has_components<Components...>(entity);
 
-        if (has_components) {
-          view.m_entities.push_back(entity);
-        }
+      if (has_components) {
+        view.m_entities.push_back(entity);
       }
-
-      return view;
     }
 
-    const std::vector<Entity*> entities() const {
-      return m_entities;
-    }
+    return view;
+  }
 
-    std::size_t size() const {
-      return m_entities.size();
-    }
+  const std::vector<Entity *> entities() const { return m_entities; }
 
-  private:
-    template <typename Component>
-    bool has_components(Entity* entity) {
-      return entity->has<Component>();
-    }
+  std::size_t size() const { return m_entities.size(); }
 
-    template <typename FirstComponent, typename SecondComponent, typename... OtherComponents>
-    bool has_components(Entity* entity) {
-      return has_components<FirstComponent>(entity) && has_components<SecondComponent, OtherComponents...>(entity);
-    }
+private:
+  template <typename Component> bool has_components(Entity *entity) {
+    return entity->has<Component>();
+  }
 
-    std::vector<Entity*> m_entities;
-  };
+  template <typename FirstComponent, typename SecondComponent,
+            typename... OtherComponents>
+  bool has_components(Entity *entity) {
+    return has_components<FirstComponent>(entity) &&
+           has_components<SecondComponent, OtherComponents...>(entity);
+  }
+
+  std::vector<Entity *> m_entities;
+};
 }
+
+#endif /* SIMPLE_ECS_HPP */
