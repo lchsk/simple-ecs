@@ -1,5 +1,8 @@
         simple-ecs change log
 
+	0.1.2 - 2019-04-20
+	* Add get_value() function to Entity to return pointer to internal value.
+
         0.1.0 - 2018-10-21
 
         * Create new project
